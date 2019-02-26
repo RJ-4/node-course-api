@@ -1,31 +1,31 @@
-const mongoose = require('mongoose');
+const {mongoose} = require('./db/mongoose');
+const {Todo} = require('./models/todo');
+const {Character} = require('./models/character');
+const {User} = require('./models/user');
 
-mongoose.Promise = global.Promise;
+const express = require('express');
+const bodyParser = require('body-parser');
 
-mongoose.connect('mongodb://localhost:27017/CharacterApp');
+let app = express();
 
-const Character = mongoose.model('characters', {
-    name: {
-        type: String
-    }, 
-    age : {
-        type: Number
-    }, 
-    isActive: {
-        type: Boolean
-    }
-});
+app.use(bodyParser.json());
 
-const newCharacter = new Character({
-    name: 'Mira',
-    age: 27,
-    isActive: true
-});
+app.post('/todos', (req, res) => {
+    let newTodo = new Todo({
+        taskNo: req.body.taskNo,
+        Description: req.body.Description
+    });
 
-newCharacter.save()
+    newTodo.save()
             .then((result) => {
-                console.log(JSON.stringify(result, undefined, 2))
+                console.log(JSON.stringify(result, undefined, 2));
+                res.send(result);
             })
             .catch((err) => {
-                console.log('Unable to add document to collection!!!', err);
+                console.log('Unable to save document', err);
             });
+});
+
+app.listen(3000, () => {
+    console.log('Server satrted at port 3000.')
+});
