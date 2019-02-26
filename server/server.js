@@ -23,7 +23,18 @@ app.post('/todos', (req, res) => {
             })
             .catch((err) => {
                 console.log('Unable to save document', err);
+                res.status(400).send(err);
             });
+});
+
+app.get('/todos', (req, res) => {
+    Todo.find()
+        .then((result) => {
+            res.send({result});
+        })
+        .catch((err) => {
+            res.status(400).send(err);
+        });
 });
 
 app.listen(3000, () => {
