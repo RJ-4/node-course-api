@@ -3,6 +3,7 @@ const {Todo} = require('./models/todo');
 const {Character} = require('./models/character');
 const {User} = require('./models/user');
 
+const _ = require('lodash');
 const {ObjectID} = require('mongodb');
 const express = require('express');
 const bodyParser = require('body-parser');
@@ -41,13 +42,13 @@ app.get('/todos', (req, res) => {
 app.get('/todos/:id', (req, res) => {
     let id = req.params.id;
     if(!ObjectID.isValid(id)) {
-        res.status(404)
+        return res.status(404)
             .send();
     }
     Todo.findById(id)
         .then((result) => {
             if(!result) {
-                res.status(404).send();
+               return res.status(404).send();
             }
             res.send({result});
         })
@@ -60,7 +61,7 @@ app.get('/todos/:id', (req, res) => {
 app.delete('/todos/:id', (req, res) => {
     let id = req.params.id;
     if(!ObjectID.isValid(id)) {
-        res.status(404).send();
+       return res.status(404).send();
     }
     // Todo.remove({
     //     _id: id
@@ -73,13 +74,38 @@ app.delete('/todos/:id', (req, res) => {
     Todo.findByIdAndRemove(id)
         .then((result) => {
             if(!result) {
-                res.status(404).send();
+               return res.status(404).send();
             }
             res.send({result});
         })
         .catch((e) => {
             res.status(400).send();
         });
+});
+
+app.patch('/todos/:id', (req, res) => {
+    let id = req.params.id;
+    let body = _.pick(req.body, ['taskNo', 'Description']);
+    if(!ObjectID.isValid(id)) {
+        return res.status(404).send();
+    }
+    Todo.findByIdAndUpdate(id, {
+        $set: {
+            taskNo: body.taskNo,
+            Description: body.Description
+        }
+    }, {
+        new: true
+    })
+        .then((result) => {
+            if(!result) {
+                return res.status(404).send();
+            }
+            res.send({result});
+        })
+        .catch((e) => {
+            res.status(400).send();
+        })
 });
 
 app.listen(3000, () => {
